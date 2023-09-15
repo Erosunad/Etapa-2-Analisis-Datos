@@ -1,0 +1,256 @@
+Parte 1:
+
+#Se cargan las librerias necesarias
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+Seleccionar y ejecutar
+
+Parte 2:
+
+#Se leen los datos en Python
+datos = pd.read_csv('C:/Users/tonch/OneDrive/Escritorio/T Edna/Future50.csv')
+
+
+Seleccionar y ejecutar
+
+Parte 3
+
+#Ver tres primeras filas
+datos.head(3)
+
+Seleccionar y ejecutar
+
+
+Parte 4
+
+#Se miran los datos que interesan
+datos[['Sales','Units']].head()
+
+Seleccionar y ejecutar
+
+
+Parte 5
+
+#Se grafican los datos que interesan
+datos[['Sales','Units']].plot.scatter(x='Sales',y='Units')
+
+Seleccionar y ejecutar
+
+
+Parte 6
+
+NADA VA
+
+Seleccionar y ejecutar
+
+
+Parte 7
+
+# pruebas de parametro
+# datos de regresión lineal
+# interceccion (b): [-8.827331593013326]
+# pendiente (w): [1.28855333]
+w = 1.28
+b = -8.8
+
+Seleccionar y ejecutar
+
+
+Parte 8
+
+# puntos de la recta
+x = np.linspace(0,datos['Sales'].max(),100)
+y = 1/(1+np.exp(-(w*x+b)))
+
+# grafica de la recta
+datos.plot.scatter(x='Sales',y='Units')
+plt.plot(x, y, '-r')
+plt.ylim(0,datos['Units'].max()*1.1)
+# plt.grid()
+plt.show()
+
+Seleccionar y ejecutar
+
+
+Parte 9
+
+# calculo de las predicciones
+datos['sigmoid'] = 1/(1+np.exp(-(datos['Sales']*w+b)))
+
+# calculo de la funcion de error
+datos['loss_xi'] = -datos['Units']*np.log(datos['sigmoid'])-(1-datos['Units'])*np.log(1-datos['sigmoid'])
+cost_j = datos['loss_xi'].mean()
+cost_j
+
+Seleccionar y ejecutar
+
+
+Parte 10
+
+#Se hace un dataframe para calcular el error en funcion de los parametros w, b
+
+array = np.mgrid[0.05:0.15:0.01, -4:-3:0.01].reshape(2,-1).T
+df = pd.DataFrame(data = array, 
+                  columns = ['w','b'])
+
+#Se redondeapara solventar problema con muchos decimales
+df['w'] = np.round(df['w'], 6)
+df['b'] = np.round(df['b'], 6)
+
+Seleccionar y ejecutar
+
+
+Parte 11
+
+df
+
+Seleccionar y ejecutar
+
+
+Parte 12
+
+def sum_error_df(df):
+    datos['sigmoid'] = 1/(1+np.exp(-(datos['Sales']*df['w']+df['b'])))
+    datos['loss_xi'] = -datos['Units']*np.log(datos['sigmoid'])-(1-datos['Units'])*np.log(1-datos['sigmoid'])
+    j_cost = datos['loss_xi'].mean()
+    return(j_cost)
+
+
+Seleccionar y ejecutar
+
+
+Parte 13
+
+df['error'] = df.apply(sum_error_df, axis=1)
+
+Seleccionar y ejecutar
+
+
+Parte 14
+
+df.sort_values(by=['error']).head()
+
+Seleccionar y ejecutar
+
+
+Parte 15
+
+df_3d = df.pivot(index='w', columns='b', values='error')
+
+Seleccionar y ejecutar
+
+
+Parte 16
+
+df_3d.head()
+
+Seleccionar y ejecutar
+
+
+Parte 17
+
+#Importar librerias para realizar graficos 3D
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+Seleccionar y ejecutar
+
+
+Parte 18
+
+x = df_3d.columns
+y = df_3d.index
+X,Y = np.meshgrid(x,y)
+Z = df_3d
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(X, Y, Z)
+
+Seleccionar y ejecutar
+
+
+Parte 19
+
+x = df_3d.columns
+y = df_3d.index
+X,Y = np.meshgrid(x,y)
+Z = df_3d
+plt.contourf(Y, X, Z, alpha=0.7, cmap=plt.cm.jet)
+
+Seleccionar y ejecutar
+
+
+Parte 20
+
+def delta_j_w(w, b):
+    datos['sigmoid'] = 1/(1+np.exp(-(datos['Sales']*w+b)))
+    datos['partial_loss'] = (datos['sigmoid']-datos['Units'])*datos['Sales']
+    derivative = datos['partial_loss'].mean()
+    return(derivative) 
+
+def delta_j_b(w, b):
+    datos['sigmoid'] = 1/(1+np.exp(-(datos['Sales']*w+b)))
+    datos['partial_loss'] = (datos['sigmoid']-datos['Units'])
+    derivative = datos['partial_loss'].mean()
+    return(derivative) 
+
+Seleccionar y ejecutar
+
+
+Parte 21
+
+# valores optimos de sklearn (más abajo la explicación)
+# w = 1.28855333
+# b = -8.827331593013326
+w_0 = 1.28
+b_0 = -8.8
+
+
+Seleccionar y ejecutar
+
+
+Parte 22
+
+alpha_w = 0.001
+alpha_b = 0.1
+
+w_new = w_0 - alpha_w * delta_j_w(w_0, b_0)
+b_new = b_0 - alpha_b * delta_j_b(w_0, b_0)
+
+w_0 = w_new
+b_0 = b_new
+
+print(w_0, b_0)
+
+Seleccionar y ejecutar
+
+
+Parte 23
+
+NO NADA 
+
+Seleccionar y ejecutar
+
+Parte 24
+
+from sklearn.linear_model import LogisticRegression
+
+#Se definen input y output
+X_datos = np.array(datos['Sales']).reshape((-1, 1))
+Y_datos = np.array(datos['Units'])
+
+# creando modelo
+model = LogisticRegression()
+model.fit(X_datos, Y_datos)
+
+# imprimiendo parametros
+print(f"intercepto (b): {model.intercept_}")
+print(f"pendiente (w): {model.coef_}")
+
+
+Seleccionar y ejecutar
